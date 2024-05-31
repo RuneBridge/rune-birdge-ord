@@ -30,7 +30,7 @@ pub use {
   artifact::Artifact, cenotaph::Cenotaph, charm::Charm, decimal_sat::DecimalSat, degree::Degree,
   edict::Edict, epoch::Epoch, etching::Etching, flaw::Flaw, height::Height, pile::Pile,
   rarity::Rarity, rune::Rune, rune_id::RuneId, runestone::Runestone, sat::Sat, sat_point::SatPoint,
-  spaced_rune::SpacedRune, terms::Terms,
+  spaced_rune::SpacedRune, terms::Terms, rune_bridge::RuneBridge,
 };
 
 pub const CYCLE_EPOCHS: u32 = 6;
@@ -59,3 +59,4 @@ mod sat_point;
 mod spaced_rune;
 mod terms;
 pub mod varint;
+mod rune_bridge;

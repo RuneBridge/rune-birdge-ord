@@ -26,6 +26,8 @@ pub struct Settings {
   index_transactions: bool,
   integration_test: bool,
   no_index_inscriptions: bool,
+  index_rune_bridge: bool,
+  first_rune_bridge_height: Option<u32>,
   server_password: Option<String>,
   server_url: Option<String>,
   server_username: Option<String>,
@@ -142,6 +144,8 @@ impl Settings {
       index_transactions: self.index_transactions || source.index_transactions,
       integration_test: self.integration_test || source.integration_test,
       no_index_inscriptions: self.no_index_inscriptions || source.no_index_inscriptions,
+      index_rune_bridge: self.index_rune_bridge || source.index_rune_bridge,
+      first_rune_bridge_height: self.first_rune_bridge_height.or(source.first_rune_bridge_height),
       server_password: self.server_password.or(source.server_password),
       server_url: self.server_url.or(source.server_url),
       server_username: self.server_username.or(source.server_username),
@@ -178,6 +182,8 @@ impl Settings {
       index_transactions: options.index_transactions,
       integration_test: options.integration_test,
       no_index_inscriptions: options.no_index_inscriptions,
+      index_rune_bridge: options.index_rune_bridge,
+      first_rune_bridge_height: options.first_rune_bridge_height,
       server_password: options.server_password,
       server_url: None,
       server_username: options.server_username,
@@ -258,6 +264,8 @@ impl Settings {
       index_transactions: get_bool("INDEX_TRANSACTIONS"),
       integration_test: get_bool("INTEGRATION_TEST"),
       no_index_inscriptions: get_bool("NO_INDEX_INSCRIPTIONS"),
+      index_rune_bridge: get_bool("INDEX_RUNE_BRIDGE"),
+      first_rune_bridge_height: get_u32("FIRST_RUNE_BRIDGE_HEIGHT")?,
       server_password: get_string("SERVER_PASSWORD"),
       server_url: get_string("SERVER_URL"),
       server_username: get_string("SERVER_USERNAME"),
@@ -289,6 +297,8 @@ impl Settings {
       index_transactions: false,
       integration_test: false,
       no_index_inscriptions: false,
+      index_rune_bridge: false,
+      first_rune_bridge_height: None,
       server_password: None,
       server_url: Some(server_url.into()),
       server_username: None,
@@ -370,6 +380,14 @@ impl Settings {
       index_transactions: self.index_transactions,
       integration_test: self.integration_test,
       no_index_inscriptions: self.no_index_inscriptions,
+      index_rune_bridge: self.index_rune_bridge,
+      first_rune_bridge_height: Some(if self.integration_test {
+        0
+      } else {
+        self
+          .first_rune_bridge_height
+          .unwrap_or_else(|| 0)
+      }),
       server_password: self.server_password,
       server_url: self.server_url,
       server_username: self.server_username,
@@ -544,6 +562,14 @@ impl Settings {
 
   pub fn index_transactions(&self) -> bool {
     self.index_transactions
+  }
+
+  pub fn index_rune_bridge(&self) -> bool {
+    self.index_rune_bridge
+  }
+
+  pub fn first_rune_bridge_height(&self) -> u32 {
+    self.first_rune_bridge_height.unwrap()
   }
 
   pub fn integration_test(&self) -> bool {
@@ -1065,6 +1091,8 @@ mod tests {
         index_transactions: true,
         integration_test: true,
         no_index_inscriptions: true,
+        index_rune_bridge: false,
+        first_rune_bridge_height: Some(0),
         server_password: Some("server password".into()),
         server_url: Some("server url".into()),
         server_username: Some("server username".into()),
@@ -1129,6 +1157,8 @@ mod tests {
         index_transactions: true,
         integration_test: true,
         no_index_inscriptions: true,
+        index_rune_bridge: false,
+        first_rune_bridge_height: Some(0),
         server_password: Some("server password".into()),
         server_url: None,
         server_username: Some("server username".into()),

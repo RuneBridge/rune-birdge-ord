@@ -1,15 +1,13 @@
 use {
-  self::{inscription_updater::InscriptionUpdater, rune_updater::RuneUpdater},
-  super::{fetcher::Fetcher, *},
-  futures::future::try_join_all,
-  tokio::sync::{
+  self::{inscription_updater::InscriptionUpdater, rune_updater::RuneUpdater}, super::{fetcher::Fetcher, *}, futures::future::try_join_all, rune_bridge_updater::RuneBridgeUpdater, templates::rune, tokio::sync::{
     broadcast::{self, error::TryRecvError},
-    mpsc::{self},
-  },
+    mpsc,
+  }
 };
 
 mod inscription_updater;
 mod rune_updater;
+mod rune_bridge_updater;
 
 pub(crate) struct BlockData {
   pub(crate) header: Header,
@@ -661,6 +659,21 @@ impl<'index> Updater<'index> {
       }
 
       rune_updater.update()?;
+    }
+
+    if self.index.index_rune_bridge && self.height >= self.index.settings.first_rune_bridge_height() {
+      let mut inscription_to_rune_bridge_block = wtx.open_table(INSCRIPTION_ID_TO_RUNE_BRIDGE_BLOCK)?;
+
+
+      let mut rune_bridge_updater = RuneBridgeUpdater {
+        block_time: block.header.time,
+        client: &self.index.client,
+        height: self.height,
+        inscription_to_rune_bridge_block: &mut inscription_to_rune_bridge_block,
+      };
+      for (i, (tx, txid)) in block.txdata.iter().enumerate() {
+        rune_bridge_updater.index_rune_bridge(u32::try_from(i).unwrap(), tx, *txid)?;
+      }
     }
 
     height_to_block_header.insert(&self.height, &block.header.store())?;

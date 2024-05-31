@@ -78,6 +78,18 @@ pub struct Options {
   pub(crate) no_index_inscriptions: bool,
   #[arg(
     long,
+    short,
+    alias = "index_rune_bridge",
+    help = "Index rune bridge."
+  )]
+  pub(crate) index_rune_bridge: bool,
+  #[arg(
+    long,
+    help = "Don't look for rune bridge below <FIRST_RUNE_BRIDGE_HEIGHT>."
+  )]
+  pub(crate) first_rune_bridge_height: Option<u32>,
+  #[arg(
+    long,
     help = "Require basic HTTP authentication with <SERVER_PASSWORD>. Credentials are sent in cleartext. Consider using authentication in conjunction with HTTPS."
   )]
   pub(crate) server_password: Option<String>,

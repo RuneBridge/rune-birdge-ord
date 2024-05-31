@@ -282,6 +282,9 @@ impl Server {
         .route("/tx/:txid", get(Self::transaction))
         .route("/decode/:txid", get(Self::decode))
         .route("/update", get(Self::update))
+
+        .route("/runebridge/:inscription_id", get(Self::runebridge))
+
         .fallback(Self::fallback)
         .layer(Extension(index))
         .layer(Extension(server_config.clone()))
@@ -997,6 +1000,20 @@ impl Server {
       if settings.integration_test() {
         index.update()?;
         Ok(index.block_count()?.to_string().into_response())
+      } else {
+        Ok(StatusCode::NOT_FOUND.into_response())
+      }
+    })
+  }
+
+  async fn runebridge(
+    Extension(index): Extension<Arc<Index>>,
+    Path(inscription_id): Path<InscriptionId>,
+  ) -> ServerResult {
+    task::block_in_place(|| {
+      let block = index.get_rune_bridge_by_inscription_id(inscription_id)?;
+      if block.is_some() {
+        Ok(block.unwrap().to_string().into_response())
       } else {
         Ok(StatusCode::NOT_FOUND.into_response())
       }

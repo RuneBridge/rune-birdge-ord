@@ -73,6 +73,7 @@ define_table! { STATISTIC_TO_COUNT, u64, u64 }
 define_table! { TRANSACTION_ID_TO_RUNE, &TxidValue, u128 }
 define_table! { TRANSACTION_ID_TO_TRANSACTION, &TxidValue, &[u8] }
 define_table! { WRITE_TRANSACTION_STARTING_BLOCK_COUNT_TO_TIMESTAMP, u32, u128 }
+define_table! { INSCRIPTION_ID_TO_RUNE_BRIDGE_BLOCK, InscriptionIdValue, u64 }
 
 #[derive(Copy, Clone)]
 pub(crate) enum Statistic {
@@ -196,6 +197,7 @@ pub struct Index {
   index_sats: bool,
   index_spent_sats: bool,
   index_transactions: bool,
+  index_rune_bridge: bool,
   path: PathBuf,
   settings: Settings,
   started: DateTime<Utc>,
@@ -445,6 +447,7 @@ impl Index {
       index_sats,
       index_spent_sats,
       index_transactions,
+      index_rune_bridge: settings.index_rune_bridge(),
       settings: settings.clone(),
       path,
       started: Utc::now(),
@@ -1471,6 +1474,20 @@ impl Index {
         .nth(inscription_id.index as usize)
         .map(|envelope| envelope.payload)
     }))
+  }
+
+  pub(crate) fn get_rune_bridge_by_inscription_id(
+    &self,
+    inscription_id: InscriptionId,
+  ) -> Result<Option<u64>> {
+    Ok(
+      self
+      .database
+      .begin_read()?
+      .open_table(INSCRIPTION_ID_TO_RUNE_BRIDGE_BLOCK)?
+      .get(inscription_id.store())?
+      .map(|guard| guard.value())
+    )
   }
 
   pub(crate) fn inscription_count(&self, txid: Txid) -> Result<u32> {
