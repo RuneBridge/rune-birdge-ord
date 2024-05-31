@@ -19,11 +19,10 @@ impl RuneBridge {
     };
 
     let Message {
-      success,
       block,
     } = Message::from_payload(transaction, &payload);
 
-    if !success {
+    if !block.is_some() {
       return None;
     }
     let mut block_bytes = [0u8; 8];
